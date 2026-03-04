@@ -1,0 +1,21 @@
+name: Tests (with Quarto)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-with-quarto:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Run all tests (including Quarto integration)
+        run: uv run pytest --cov=src/notebook_pdf --cov-report=term-missing
