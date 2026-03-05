@@ -111,6 +111,66 @@ def test_find_raises_on_ambiguous_matches(tmp_path):
         )
 
 
+def test_find_candidate_dir_match_with_spaces_in_name(tmp_path):
+    """Finds a notebook whose filename contains spaces via candidate dirs."""
+    nb = tmp_path / "My Notebook.ipynb"
+    nb.touch()
+
+    from notebook_pdf.notebook_retrieval.drive import _find_notebook_on_drive
+    result = _find_notebook_on_drive(
+        "My Notebook.ipynb",
+        candidate_dirs=[tmp_path],
+        drive_root=tmp_path,
+    )
+    assert result == nb
+
+
+def test_find_glob_fallback_with_spaces_in_name(tmp_path):
+    """Falls back to recursive glob and finds a notebook with spaces in its name."""
+    subdir = tmp_path / "deep"
+    subdir.mkdir()
+    nb = subdir / "My Notebook.ipynb"
+    nb.touch()
+
+    from notebook_pdf.notebook_retrieval.drive import _find_notebook_on_drive
+    result = _find_notebook_on_drive(
+        "My Notebook.ipynb",
+        candidate_dirs=[tmp_path / "nonexistent"],
+        drive_root=tmp_path,
+    )
+    assert result == nb
+
+
+def test_find_candidate_dir_match_without_extension(tmp_path):
+    """Finds a notebook file that has no extension via candidate dirs."""
+    nb = tmp_path / "My Notebook"
+    nb.touch()
+
+    from notebook_pdf.notebook_retrieval.drive import _find_notebook_on_drive
+    result = _find_notebook_on_drive(
+        "My Notebook",
+        candidate_dirs=[tmp_path],
+        drive_root=tmp_path,
+    )
+    assert result == nb
+
+
+def test_find_glob_fallback_without_extension(tmp_path):
+    """Falls back to recursive glob and finds a notebook file with no extension."""
+    subdir = tmp_path / "deep"
+    subdir.mkdir()
+    nb = subdir / "My Notebook"
+    nb.touch()
+
+    from notebook_pdf.notebook_retrieval.drive import _find_notebook_on_drive
+    result = _find_notebook_on_drive(
+        "My Notebook",
+        candidate_dirs=[tmp_path / "nonexistent"],
+        drive_root=tmp_path,
+    )
+    assert result == nb
+
+
 def test_find_error_lists_conflicting_paths(tmp_path):
     """The ambiguity error message includes both conflicting paths."""
     dir_a = tmp_path / "a"
